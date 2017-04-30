@@ -65,8 +65,10 @@ awful.key({ "Mod1", "Shift"   }, "Tab",
 
 ## Credits ##
 
-This plugin was created by [Joren Heit](https://github.com/jorenheit)
+The original plugin was created by [Joren Heit](https://github.com/jorenheit)
 and later improved upon by [Matthias Berla](https://github.com/berlam).
+
+Mac OS look and feel was done by [David Schatz](https://github.com/wyv3rn).
 
 ## License ##
 
