@@ -126,7 +126,7 @@ local function preview()
       textHeight = cr:text_extents(maxText).height
 
       if textWidth < w - textboxHeight and textHeight < textboxHeight then
-   	 break
+   	  break
       end
 
       bigFont = bigFont - 1
@@ -138,99 +138,97 @@ local function preview()
    for i = 1, #altTabTable do
       preview_widgets[i] = wibox.widget.base.make_widget()
       preview_widgets[i].fit = function(preview_widget, width, height)
-   	 return w, h
+         return w, h
       end
 
       local c = altTabTable[i]
 
       preview_widgets[i].draw = function(preview_widget, preview_wbox, cr, width, height)
-       if width ~= 0 and height ~= 0 then
+         if width ~= 0 and height ~= 0 then
+            local a = 0.8
+            local overlay = 0.6
+            local fontSize = smallFont
+	            if c == altTabTable[altTabIndex] then
+                  a = 0.9
+	               overlay = 0
+	               fontSize = bigFont
+	         end
 
-	    local a = 0.8
-	    local overlay = 0.6
-	    local fontSize = smallFont
-	    if c == altTabTable[altTabIndex] then
-	       a = 0.9
-	       overlay = 0
-	       fontSize = bigFont
-	    end
+   	      local sx, sy, tx, ty
 
-   	    local sx, sy, tx, ty
+            -- Icons
+            local icon
+            if c.icon == nil then
+             icon = gears.surface(gears.surface.load(noicon))
+            else
+             icon = gears.surface(c.icon)
+            end
 
-	    -- Icons
-	    local icon
-	    if c.icon == nil then
-	       icon = gears.surface(gears.surface.load(noicon))
-	    else
-	       icon = gears.surface(c.icon)
-	    end
+            local iconboxWidth = 0.9 * textboxHeight
+            local iconboxHeight = iconboxWidth
 
-	    local iconboxWidth = 0.9 * textboxHeight
-	    local iconboxHeight = iconboxWidth
+            -- Titles
+            cr:select_font_face(unpack(settings.preview_box_title_font))
+            cr:set_font_face(cr:get_font_face())
+            cr:set_font_size(fontSize)
 
-	    -- Titles
-	    cr:select_font_face(unpack(settings.preview_box_title_font))
-	    cr:set_font_face(cr:get_font_face())
-	    cr:set_font_size(fontSize)
+            text = " - " .. c.class
+            textWidth = cr:text_extents(text).width
+            textHeight = cr:text_extents(text).height
 
+            local titleboxWidth = textWidth + iconboxWidth
+            local titleboxHeight = textboxHeight
 
-	    text = " - " .. c.class
-	    textWidth = cr:text_extents(text).width
-	    textHeight = cr:text_extents(text).height
-
-	    local titleboxWidth = textWidth + iconboxWidth
-	    local titleboxHeight = textboxHeight
-
-	    -- Draw icons
-	    tx = (w - titleboxWidth) / 2
-	    ty = h
-	    sx = iconboxWidth / icon.width
-	    sy = iconboxHeight  / icon.height
+            -- Draw icons
+            tx = (w - titleboxWidth) / 2
+            ty = h
+            sx = iconboxWidth / icon.width
+            sy = iconboxHeight  / icon.height
 
 
-	    cr:translate(tx, ty)
-	    cr:scale(sx, sy)
-	    cr:set_source_surface(icon, 0, 0)
-	    cr:paint()
-	    cr:scale(1/sx, 1/sy)
-	    cr:translate(-tx, -ty)
+            cr:translate(tx, ty)
+            cr:scale(sx, sy)
+            cr:set_source_surface(icon, 0, 0)
+            cr:paint()
+            cr:scale(1/sx, 1/sy)
+            cr:translate(-tx, -ty)
 
-	    -- Draw titles
-	    tx = tx + iconboxWidth
-	    ty = h + (textboxHeight + textHeight) / 2
+            -- Draw titles
+            tx = tx + iconboxWidth
+            ty = h + (textboxHeight + textHeight) / 2
 
-	    cr:set_source_rgba(unpack(settings.preview_box_title_color))
-	    cr:move_to(tx, ty)
-	    cr:show_text(text)
-	    cr:stroke()
+            cr:set_source_rgba(unpack(settings.preview_box_title_color))
+            cr:move_to(tx, ty)
+            cr:show_text(text)
+            cr:stroke()
 
-	    -- Draw previews
-   	    local cg = c:geometry()
-	    if cg.width > cg.height then
-	       sx = a * w / cg.width
-	       sy = math.min(sx, a * h / cg.height)
-	    else
-	       sy = a * h / cg.height
-	       sx = math.min(sy, a * h / cg.width)
-	    end
+            -- Draw previews
+            local cg = c:geometry()
+            if cg.width > cg.height then
+               sx = a * w / cg.width
+               sy = math.min(sx, a * h / cg.height)
+            else
+               sy = a * h / cg.height
+               sx = math.min(sy, a * h / cg.width)
+            end
 
-	    tx = (w - sx * cg.width) / 2
-	    ty = (h - sy * cg.height) / 2
+            tx = (w - sx * cg.width) / 2
+            ty = (h - sy * cg.height) / 2
 
-	    local tmp = gears.surface(c.content)
-	    cr:translate(tx, ty)
-	    cr:scale(sx, sy)
-	    cr:set_source_surface(tmp, 0, 0)
-	    cr:paint()
-	    tmp:finish()
+            local tmp = gears.surface(c.content)
+            cr:translate(tx, ty)
+            cr:scale(sx, sy)
+            cr:set_source_surface(tmp, 0, 0)
+            cr:paint()
+            tmp:finish()
 
-	    -- Overlays
-	    cr:scale(1/sx, 1/sy)
-	    cr:translate(-tx, -ty)
-	    cr:set_source_rgba(0,0,0,overlay)
-	    cr:rectangle(tx, ty, sx * cg.width, sy * cg.height)
-	    cr:fill()
-   	 end
+            -- Overlays
+            cr:scale(1/sx, 1/sy)
+            cr:translate(-tx, -ty)
+            cr:set_source_rgba(0,0,0,overlay)
+            cr:rectangle(tx, ty, sx * cg.width, sy * cg.height)
+            cr:fill()
+         end
       end
 
       -- Add mouse handler
@@ -302,7 +300,6 @@ local function switch(dir, alt, tab, shift_tab)
    local t = s.selected_tag
    local all = client.get(s)
 
-
    for i = 1, #all do
       local c = all[i]
       local ctags = c:tags();
@@ -310,29 +307,28 @@ local function switch(dir, alt, tab, shift_tab)
       -- check if the client is on the current tag
       local isCurrentTag = false
       for j = 1, #ctags do
-	 if t == ctags[j] then
-	    isCurrentTag = true
-	    break
-	 end
+         if t == ctags[j] then
+            isCurrentTag = true
+            break
+         end
       end
 
       if isCurrentTag then
-	 -- check if client is already in the history
-	 -- if not, add it
-	 local addToTable = true
-	 for k = 1, #altTabTable do
-	    if altTabTable[k] == c then
-	       addToTable = false
-	       break
-	    end
-	 end
+         -- check if client is already in the history
+         -- if not, add it
+         local addToTable = true
+         for k = 1, #altTabTable do
+            if altTabTable[k] == c then
+               addToTable = false
+               break
+            end
+         end
 
-
-	 if addToTable then
-	    table.insert(altTabTable, c)
-	    table.insert(altTabMinimized, c.minimized)
-	    table.insert(altTabOpacity, c.opacity)
-	 end
+         if addToTable then
+            table.insert(altTabTable, c)
+            table.insert(altTabMinimized, c.minimized)
+            table.insert(altTabOpacity, c.opacity)
+         end
       end
    end
 
@@ -372,8 +368,7 @@ local function switch(dir, alt, tab, shift_tab)
    -- Now that we have collected all windows, we should run a keygrabber
    -- as long as the user is alt-tabbing:
    if(keygrabber.isrunning() == false) then
-       keygrabber.run(
-          function (mod, key, event)
+      keygrabber.run(function (mod, key, event)
          -- Stop alt-tabbing when the alt-key is released
          if key == alt or key == "Escape" and event == "release" then
             preview_wbox.visible = false
@@ -384,7 +379,7 @@ local function switch(dir, alt, tab, shift_tab)
 
             if key == "Escape" then
                for i,c in pairs(altTabTable) do
-              c.opacity = altTabOpacity[i]
+                  c.opacity = altTabOpacity[i]
                end
                keygrabber.stop()
                return
@@ -395,8 +390,8 @@ local function switch(dir, alt, tab, shift_tab)
             for i = 1, altTabIndex - 1 do
                c = altTabTable[altTabIndex - i]
                if not altTabMinimized[i] then
-              c:raise()
-              client.focus = c
+                  c:raise()
+                  client.focus = c
                end
             end
 
@@ -408,38 +403,37 @@ local function switch(dir, alt, tab, shift_tab)
             -- restore minimized clients
             for i = 1, #altTabTable do
                if i ~= altTabIndex and altTabMinimized[i] then
-              altTabTable[i].minimized = true
+                  altTabTable[i].minimized = true
                end
                altTabTable[i].opacity = altTabOpacity[i]
             end
 
             keygrabber.stop()
 
-                -- Move to next client on each Tab-press
+         -- Move to next client on each Tab-press
          elseif (key == tab or key == "Right") and event == "press" then
             altTabIndex = cycle(altTabTable, altTabIndex, 1)
             if settings.cycle_raise_client == true then
-              c = altTabTable[altTabIndex]
-              c:raise()
+               c = altTabTable[altTabIndex]
+               c:raise()
             end
 
-                -- Move to previous client on Shift-Tab
+         -- Move to previous client on Shift-Tab
          elseif (key == shift_tab or key == "Left") and event == "press" then
             altTabIndex = cycle(altTabTable, altTabIndex, -1)
             if settings.cycle_raise_client == true then
-              c = altTabTable[altTabIndex]
-              c:raise()
+               c = altTabTable[altTabIndex]
+               c:raise()
             end
          end
-          end
-       )
+         end)
    end
 
    -- switch to next client
    altTabIndex = cycle(altTabTable, altTabIndex, dir)
    if settings.cycle_raise_client == true then
-     c = altTabTable[altTabIndex]
-     c:raise()
+      c = altTabTable[altTabIndex]
+      c:raise()
    end
 
 end -- function altTab
