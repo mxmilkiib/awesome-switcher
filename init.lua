@@ -26,7 +26,7 @@ local cr = cairo.Context(surface)
 
 -- settings
 
-local settings = { 
+local settings = {
    preview_box = true,
    preview_box_bg = "#ddddddaa",
    preview_box_border = "#22222200",
@@ -91,7 +91,7 @@ local function preview()
    preview_wbox.border_color = settings.preview_box_border
 
    local preview_widgets = {}
-   
+
    -- Make the wibox the right size, based on the number of clients
    local n = math.max(7, #altTabTable)
    local W = screen[mouse.screen].geometry.width -- + 2 * preview_wbox.border_width
@@ -103,36 +103,14 @@ local function preview()
    local y = screen[mouse.screen].geometry.y + (screen[mouse.screen].geometry.height - h - textboxHeight) / 2
    preview_wbox:geometry({x = x, y = y, width = W, height = h + textboxHeight})
 
-   -- create a list that holds the clients to preview, from left to right
-   local leftRightTab = {}
-   local leftRightTabToAltTabIndex = {} -- save mapping from leftRightTab to altTabTable as well
-   local nLeft
-   local nRight
-   if #altTabTable == 2 then
-      nLeft = 0
-      nRight = 2
-   else
-      nLeft = math.floor(#altTabTable / 2)
-      nRight = math.ceil(#altTabTable / 2)
-   end
-
-   for i = 1, nLeft do
-      table.insert(leftRightTab, altTabTable[#altTabTable - nLeft + i])
-      table.insert(leftRightTabToAltTabIndex, #altTabTable - nLeft + i)
-   end
-   for i = 1, nRight do
-      table.insert(leftRightTab, altTabTable[i])
-      table.insert(leftRightTabToAltTabIndex, i)
-   end
-
    -- determine fontsize -> find maximum classname-length
    local text, textWidth, textHeight, maxText
    local maxTextWidth = 0
    local maxTextHeight = 0
    local bigFont = textboxHeight / 2
    cr:set_font_size(fontSize)
-   for i = 1, #leftRightTab do
-      text = " - " .. leftRightTab[i].class 
+   for i = 1, #altTabTable do
+      text = " - " .. altTabTable[i].class
       textWidth = cr:text_extents(text).width
       textHeight = cr:text_extents(text).height
       if textWidth > maxTextWidth or textHeight > maxTextHeight then
@@ -157,13 +135,13 @@ local function preview()
 
 
    -- create all the widgets
-   for i = 1, #leftRightTab do
+   for i = 1, #altTabTable do
       preview_widgets[i] = wibox.widget.base.make_widget()
       preview_widgets[i].fit = function(preview_widget, width, height)
    	 return w, h
       end
-      
-      local c = leftRightTab[i]
+
+      local c = altTabTable[i]
 
       preview_widgets[i].draw = function(preview_widget, preview_wbox, cr, width, height)
        if width ~= 0 and height ~= 0 then
@@ -181,12 +159,12 @@ local function preview()
 
 	    -- Icons
 	    local icon
-	    if c.icon == nil then 
+	    if c.icon == nil then
 	       icon = gears.surface(gears.surface.load(noicon))
 	    else
 	       icon = gears.surface(c.icon)
 	    end
-	       
+
 	    local iconboxWidth = 0.9 * textboxHeight
 	    local iconboxHeight = iconboxWidth
 
@@ -194,18 +172,18 @@ local function preview()
 	    cr:select_font_face(unpack(settings.preview_box_title_font))
 	    cr:set_font_face(cr:get_font_face())
 	    cr:set_font_size(fontSize)
-	    
+
 
 	    text = " - " .. c.class
 	    textWidth = cr:text_extents(text).width
 	    textHeight = cr:text_extents(text).height
 
-	    local titleboxWidth = textWidth + iconboxWidth 
+	    local titleboxWidth = textWidth + iconboxWidth
 	    local titleboxHeight = textboxHeight
 
 	    -- Draw icons
 	    tx = (w - titleboxWidth) / 2
-	    ty = h 
+	    ty = h
 	    sx = iconboxWidth / icon.width
 	    sy = iconboxHeight  / icon.height
 
@@ -216,7 +194,7 @@ local function preview()
 	    cr:paint()
 	    cr:scale(1/sx, 1/sy)
 	    cr:translate(-tx, -ty)
-	    
+
 	    -- Draw titles
 	    tx = tx + iconboxWidth
 	    ty = h + (textboxHeight + textHeight) / 2
@@ -229,10 +207,10 @@ local function preview()
 	    -- Draw previews
    	    local cg = c:geometry()
 	    if cg.width > cg.height then
-	       sx = a * w / cg.width 
+	       sx = a * w / cg.width
 	       sy = math.min(sx, a * h / cg.height)
 	    else
-	       sy = a * h / cg.height	       
+	       sy = a * h / cg.height
 	       sx = math.min(sy, a * h / cg.width)
 	    end
 
@@ -257,11 +235,11 @@ local function preview()
 
       -- Add mouse handler
       preview_widgets[i]:connect_signal("mouse::enter", function()
-         altTabIndex = cycle(altTabTable, altTabIndex, leftRightTabToAltTabIndex[i] - altTabIndex)
+         altTabIndex = cycle(altTabTable, altTabIndex, i - altTabIndex)
       end)
 
-      preview_live_timer:connect_signal("timeout", function() 
-					   preview_widgets[i]:emit_signal("widget::updated") 
+      preview_live_timer:connect_signal("timeout", function()
+					   preview_widgets[i]:emit_signal("widget::updated")
       end)
 
    end
@@ -275,9 +253,9 @@ local function preview()
 
    --layout
    preview_layout = wibox.layout.fixed.horizontal()
-   
+
    preview_layout:add(spacer)
-   for i = 1, #leftRightTab do
+   for i = 1, #altTabTable do
       preview_layout:add(preview_widgets[i])
    end
    preview_layout:add(spacer)
@@ -323,7 +301,7 @@ local function switch(dir, alt, tab, shift_tab)
 
    local t = s.selected_tag
    local all = client.get(s)
-   
+
 
    for i = 1, #all do
       local c = all[i]
@@ -360,7 +338,7 @@ local function switch(dir, alt, tab, shift_tab)
 
    if #altTabTable == 0 then
       return
-   elseif #altTabTable == 1 then 
+   elseif #altTabTable == 1 then
       altTabTable[1].minimized = false
       altTabTable[1]:raise()
       return
@@ -372,10 +350,10 @@ local function switch(dir, alt, tab, shift_tab)
    -- preview delay timer
    local previewDelay = settings.preview_box_delay / 1000
    local previewDelayTimer = timer({timeout = previewDelay})
-   previewDelayTimer:connect_signal("timeout", function() 
+   previewDelayTimer:connect_signal("timeout", function()
 				       preview_wbox.visible = true
 				       previewDelayTimer:stop()
-				       preview(altTabTable, altTabIndex) 
+				       preview(altTabTable, altTabIndex)
    end)
    previewDelayTimer:start()
    preview_live_timer:start()
@@ -383,7 +361,7 @@ local function switch(dir, alt, tab, shift_tab)
    -- opacity delay timer
    local opacityDelay = settings.client_opacity_delay / 1000
    local opacityDelayTimer = timer({timeout = opacityDelay})
-   opacityDelayTimer:connect_signal("timeout", function() 
+   opacityDelayTimer:connect_signal("timeout", function()
 				       applyOpacity = true
 				       opacityDelayTimer:stop()
 				       clientOpacity(altTabTable, altTabIndex)
@@ -395,7 +373,7 @@ local function switch(dir, alt, tab, shift_tab)
    -- as long as the user is alt-tabbing:
    if(keygrabber.isrunning() == false) then
        keygrabber.run(
-          function (mod, key, event)  
+          function (mod, key, event)
          -- Stop alt-tabbing when the alt-key is released
          if key == alt or key == "Escape" and event == "release" then
             preview_wbox.visible = false
@@ -403,8 +381,8 @@ local function switch(dir, alt, tab, shift_tab)
             preview_live_timer:stop()
             previewDelayTimer:stop()
             opacityDelayTimer:stop()
-       
-            if key == "Escape" then 
+
+            if key == "Escape" then
                for i,c in pairs(altTabTable) do
               c.opacity = altTabOpacity[i]
                end
@@ -425,11 +403,11 @@ local function switch(dir, alt, tab, shift_tab)
             -- raise chosen client on top of all
             c = altTabTable[altTabIndex]
             c:raise()
-            client.focus = c                  
+            client.focus = c
 
             -- restore minimized clients
             for i = 1, #altTabTable do
-               if i ~= altTabIndex and altTabMinimized[i] then 
+               if i ~= altTabIndex and altTabMinimized[i] then
               altTabTable[i].minimized = true
                end
                altTabTable[i].opacity = altTabOpacity[i]
@@ -444,7 +422,7 @@ local function switch(dir, alt, tab, shift_tab)
               c = altTabTable[altTabIndex]
               c:raise()
             end
-            
+
                 -- Move to previous client on Shift-Tab
          elseif (key == shift_tab or key == "Left") and event == "press" then
             altTabIndex = cycle(altTabTable, altTabIndex, -1)
