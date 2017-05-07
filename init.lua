@@ -152,16 +152,16 @@ local function preview()
                   a = 0.9
 	               overlay = 0
 	               fontSize = bigFont
-	         end
+	            end
 
    	      local sx, sy, tx, ty
 
             -- Icons
             local icon
             if c.icon == nil then
-             icon = gears.surface(gears.surface.load(noicon))
+               icon = gears.surface(gears.surface.load(noicon))
             else
-             icon = gears.surface(c.icon)
+               icon = gears.surface(c.icon)
             end
 
             local iconboxWidth = 0.9 * textboxHeight

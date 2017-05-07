@@ -18,14 +18,15 @@ Features:
 
 Clone the repo into your `$XDG_CONFIG_HOME/awesome` directory and add the
 dependency to your `rc.lua`.
+If `$XDG_CONFIG_HOME` is not set, the default is `$HOME/.config`.
 
 ```Shell
 cd "$XDG_CONFIG_HOME/awesome"
-git clone https://github.com/berlam/awesome-switcher-preview.git awesome-switcher-preview
+git clone https://github.com/wyv3rn/awesome-switcher-macstyle.git
 ```
 
 ```Lua
-local switcher = require("awesome-switcher-preview")
+local switcher = require("awesome-switcher-macstyle")
 ```
 
 ## Configuration ##
