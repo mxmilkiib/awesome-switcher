@@ -1,9 +1,7 @@
 awesome-switcher-preview
 ========================
 
-Integrate familiar Alt-Tab functionality in [awesome wm](https://github.com/awesomeWM/awesome).
-
-![Screenshot of awesome-switcher-preview](screenshot.png)
+Integrate familiar Mac OS X Alt-Tab functionality in [awesome wm](https://github.com/awesomeWM/awesome).
 
 Features:
 
@@ -13,6 +11,14 @@ Features:
 * Backward cycle using shift
 * Intuitive order, respecting your client history
 * Includes minimized clients (in contrast to some of the default window-switching utilies)
+
+Planned features:
+
+* Make live previews optionally, use big icons like in Mac OS X instead
+* Optionally group different clients from the same application (e.g. multiple windows from Thunderbird) for alt-tab (to avoid confusion when only icons are used as preview)
+* Switch between different clients from the same application with an additional key combination (e.g. alt-< and alt->)
+
+![Screenshot of awesome-switcher-preview](screenshot.png)
 
 ## Installation ##
 
@@ -49,15 +55,14 @@ switcher.settings.client_opacity_delay = 150,                         -- delay i
 ```
 
 Add key-bindings:
-On my particular system, and I guess most, Shift-Tab is captured by the keygrabber as a 
-single key, namely `ISO_LEFT_TAB`. Therefore, this is what my keybindings look like:
+On my particular system, and I guess most, Shift-Tab is captured by the keygrabber as a single key, namely `ISO_LEFT_TAB`. Therefore, this is what my keybindings look like:
 
 ```Lua
 awful.key({ "Mod1",           }, "Tab",
    function ()
        switcher.switch( 1, "Alt_L", "Tab", "ISO_Left_Tab")
    end),
- 
+
 awful.key({ "Mod1", "Shift"   }, "Tab",
    function ()
        switcher.switch(-1, "Alt_L", "Tab", "ISO_Left_Tab")
