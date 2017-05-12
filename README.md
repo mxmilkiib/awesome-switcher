@@ -52,6 +52,8 @@ switcher.settings.preview_box_title_color = {0,0,0,1},                -- the fon
 switcher.settings.client_opacity = false,                             -- opacity for unselected clients
 switcher.settings.client_opacity_value = 0.5,                         -- alpha-value
 switcher.settings.client_opacity_delay = 150,                         -- delay in ms
+
+switcher.settings.cycle_raise_client = false,                         -- raise (bring to front) selected clients while tabbing
 ```
 
 Add key-bindings:
