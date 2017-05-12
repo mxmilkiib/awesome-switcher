@@ -377,17 +377,14 @@ local function switch(dir, alt, tab, shift_tab)
             opacityDelayTimer:stop()
 
             if key == "Escape" then
-               for i,c in pairs(altTabTable) do
-                  c.opacity = altTabOpacity[i]
-               end
-               keygrabber.stop()
-               return
+               -- (cycle) back to the original client when escaping
+               altTabIndex = cycle(altTabTable, altTabIndex, 1 - altTabIndex)
             end
 
             -- Raise clients in order to restore history
             local c
-            for i = 1, altTabIndex - 1 do
-               c = altTabTable[altTabIndex - i]
+            for i = #altTabTable, 1, -1 do
+               c = altTabTable[i]
                if not altTabMinimized[i] then
                   c:raise()
                   client.focus = c
