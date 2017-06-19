@@ -124,7 +124,7 @@ local function preview()
    local text, textWidth, textHeight, maxText
    local maxTextWidth = 0
    local maxTextHeight = 0
-   local bigFont = textboxHeight / 2
+   local fontSize = textboxHeight / 2
    cr:set_font_size(fontSize)
    for i = 1, #altTabTable do
       text = " - " .. altTabTable[i].class
@@ -138,7 +138,7 @@ local function preview()
    end
 
    while true do
-      cr:set_font_size(bigFont)
+      cr:set_font_size(fontSize)
       textWidth = cr:text_extents(maxText).width
       textHeight = cr:text_extents(maxText).height
 
@@ -146,7 +146,7 @@ local function preview()
          break
       end
 
-      bigFont = bigFont - 1
+      fontSize = fontSize - 1
    end
 
    -- create all the widgets
@@ -158,24 +158,30 @@ local function preview()
 
       local c = altTabTable[i]
 
+      -- Find icon with best resolution
+      local icon
+      if c.icon == nil then
+         icon = gears.surface(gears.surface.load(noicon))
+      else
+         local max_res = 0
+         local max_res_idx = 0
+         for i = 1, #c.icon_sizes do
+            current_res = c.icon_sizes[i][1]
+            if current_res > max_res then
+               max_res = current_res
+               max_res_idx = i
+            end
+         end
+         icon = gears.surface(c:get_icon(max_res_idx))
+      end
+
+      local iconboxHeight = 0.8 * h
+      local iconboxWidth = iconboxHeight
+
       preview_widgets[i].draw = function(preview_widget, preview_wbox, cr, width, height)
          if width ~= 0 and height ~= 0 then
             local focus = (c == altTabTable[altTabIndex])
-            local fontSize = bigFont
-
-   	      local sx, sy, tx, ty
-
-            -- Icons
-            -- TODO resolution of icons? (really bad atm)
-            local icon
-            if c.icon == nil then
-               icon = gears.surface(gears.surface.load(noicon))
-            else
-               icon = gears.surface(c.icon)
-            end
-
-            local iconboxHeight = 0.8 * h
-            local iconboxWidth = iconboxHeight
+            local sx, sy, tx, ty
 
             -- Titles
             cr:select_font_face(unpack(settings.preview_box_title_font))
@@ -185,7 +191,6 @@ local function preview()
             text = c.class
             textWidth = cr:text_extents(text).width
             textHeight = cr:text_extents(text).height
-
 
             -- Draw icons and icon background for selected client
             tx = (w - iconboxWidth) / 2
