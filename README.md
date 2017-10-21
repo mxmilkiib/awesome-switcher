@@ -5,7 +5,7 @@ Integrate familiar Mac OS X Alt-Tab functionality in [awesome wm](https://github
 
 Features:
 
-* Live previews while alt-tabbing AND/OR Opacity effects for unselected clients
+* Icon view like on Mac OS X or live previews while alt-tabbing
 * Easily adjustable settings
 * No previews when alt-tab is released within some time-frame
 * Backward cycle using shift
@@ -14,7 +14,6 @@ Features:
 
 Planned features:
 
-* Make live previews optionally, use big icons like in Mac OS X instead
 * Optionally group different clients from the same application (e.g. multiple windows from Thunderbird) for alt-tab (to avoid confusion when only icons are used as preview)
 * Switch between different clients from the same application with an additional key combination (e.g. alt-< and alt->)
 
