@@ -60,16 +60,21 @@ local source = string.sub(debug.getinfo(1,'S').source, 2)
 local path = string.sub(source, 1, string.find(source, "/[^/]*$"))
 local noicon = path .. "noicon.png"
 
-local function clientOpacity(altTabTable, altTabIndex)
-   if not settings.client_opacity then return end
+local function cairo_rounded_rectangle(cr, x, y, width, height)
+   -- draw rounded rectangle with cairo context cr (without fill)
+   -- thanks to https://www.cairographics.org/samples/rounded_rectangle/
+   local aspect = 1.0
+   local corner_radius = height / 10.0
 
-   for i,c in pairs(altTabTable) do
-      if i == altTabIndex then
-         c.opacity = 1
-      elseif applyOpacity then
-         c.opacity = settings.client_opacity_value
-      end
-   end
+   local radius = corner_radius / aspect
+   local degrees = 3.1415 / 180.0
+
+   cr:new_sub_path()
+   cr:arc(x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees)
+   cr:arc(x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees)
+   cr:arc(x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees)
+   cr:arc(x + radius, y + radius, radius, 180 * degrees, 270 * degrees)
+   cr:close_path()
 end
 
 local function cycle(altTabTable, altTabIndex, dir)
@@ -113,7 +118,7 @@ local function preview()
    local n = math.max(7, #altTabTable)
    local W = screen[mouse.screen].geometry.width -- + 2 * preview_wbox.border_width
    local w = W / n -- widget width
-   local h = w * 0.75  -- widget height
+   local h = w * 0.75  -- widget height -- without the titlebox!
    local textboxHeight = w * 0.125
 
    local x = screen[mouse.screen].geometry.x - preview_wbox.border_width
@@ -124,32 +129,30 @@ local function preview()
    local text, textWidth, textHeight, maxText
    local maxTextWidth = 0
    local maxTextHeight = 0
-   local bigFont = textboxHeight / 2
+   local fontSize = textboxHeight / 2
    cr:set_font_size(fontSize)
    for i = 1, #altTabTable do
       text = " - " .. altTabTable[i].class
       textWidth = cr:text_extents(text).width
       textHeight = cr:text_extents(text).height
       if textWidth > maxTextWidth or textHeight > maxTextHeight then
-   	 maxTextHeight = textHeight
-   	 maxTextWidth = textWidth
-   	 maxText = text
+         maxTextHeight = textHeight
+         maxTextWidth = textWidth
+         maxText = text
       end
    end
 
    while true do
-      cr:set_font_size(bigFont)
+      cr:set_font_size(fontSize)
       textWidth = cr:text_extents(maxText).width
       textHeight = cr:text_extents(maxText).height
 
       if textWidth < w - textboxHeight and textHeight < textboxHeight then
-   	  break
+         break
       end
 
-      bigFont = bigFont - 1
+      fontSize = fontSize - 1
    end
-   local smallFont = bigFont * settings.preview_box_title_font_size_factor
-
 
    -- create all the widgets
    for i = 1, #altTabTable do
@@ -160,49 +163,57 @@ local function preview()
 
       local c = altTabTable[i]
 
+      -- Find icon with best resolution
+      local icon
+      if c.icon == nil then
+         icon = gears.surface(gears.surface.load(noicon))
+      else
+         local max_res = 0
+         local max_res_idx = 0
+         for i = 1, #c.icon_sizes do
+            current_res = c.icon_sizes[i][1]
+            if current_res > max_res then
+               max_res = current_res
+               max_res_idx = i
+            end
+         end
+         icon = gears.surface(c:get_icon(max_res_idx))
+      end
+
+      local iconboxHeight = 0.8 * h
+      local iconboxWidth = iconboxHeight
+
       preview_widgets[i].draw = function(preview_widget, preview_wbox, cr, width, height)
          if width ~= 0 and height ~= 0 then
-            local a = 0.8
-            local overlay = 0.6
-            local fontSize = smallFont
-
-            if c == altTabTable[altTabIndex] then
-               a = 0.9
-               overlay = 0
-               fontSize = bigFont
-            end
-
-   	      local sx, sy, tx, ty
-
-            -- Icons
-            local icon
-            if c.icon == nil then
-               icon = gears.surface(gears.surface.load(noicon))
-            else
-               icon = gears.surface(c.icon)
-            end
-
-            local iconboxWidth = 0.9 * textboxHeight
-            local iconboxHeight = iconboxWidth
+            local focus = (c == altTabTable[altTabIndex])
+            local sx, sy, tx, ty
 
             -- Titles
             cr:select_font_face(unpack(settings.preview_box_title_font))
             cr:set_font_face(cr:get_font_face())
             cr:set_font_size(fontSize)
 
-            text = " - " .. c.class
+            text = c.class
             textWidth = cr:text_extents(text).width
             textHeight = cr:text_extents(text).height
 
-            local titleboxWidth = textWidth + iconboxWidth
-            local titleboxHeight = textboxHeight
-
-            -- Draw icons
-            tx = (w - titleboxWidth) / 2
-            ty = h
+            -- Draw icons and icon background for selected client
+            tx = (w - iconboxWidth) / 2
+            ty = (h - iconboxHeight) / 2
             sx = iconboxWidth / icon.width
             sy = iconboxHeight  / icon.height
 
+            -- Draw icon background for selected client
+            if focus then
+               local width = iconboxWidth * 1.1
+               local height = iconboxHeight * 1.1
+               local x = tx - (width - iconboxWidth) / 2
+               local y = ty - (height - iconboxHeight) / 2
+               cairo_rounded_rectangle(cr, x, y, width, height)
+
+               cr:set_source_rgba(0, 0, 0, 0.5)
+               cr:fill()
+            end
 
             cr:translate(tx, ty)
             cr:scale(sx, sy)
@@ -211,41 +222,16 @@ local function preview()
             cr:scale(1/sx, 1/sy)
             cr:translate(-tx, -ty)
 
-            -- Draw titles
-            tx = tx + iconboxWidth
-            ty = h + (textboxHeight + textHeight) / 2
+            -- Draw title for selected client
+            if focus then
+               tx = (w - textWidth) / 2
+               ty = h + (textboxHeight + textHeight) / 2
 
-            cr:set_source_rgba(unpack(settings.preview_box_title_color))
-            cr:move_to(tx, ty)
-            cr:show_text(text)
-            cr:stroke()
-
-            -- Draw previews
-            local cg = c:geometry()
-            if cg.width > cg.height then
-               sx = a * w / cg.width
-               sy = math.min(sx, a * h / cg.height)
-            else
-               sy = a * h / cg.height
-               sx = math.min(sy, a * h / cg.width)
+               cr:set_source_rgba(unpack(settings.preview_box_title_color))
+               cr:move_to(tx, ty)
+               cr:show_text(text)
+               cr:stroke()
             end
-
-            tx = (w - sx * cg.width) / 2
-            ty = (h - sy * cg.height) / 2
-
-            local tmp = gears.surface(c.content)
-            cr:translate(tx, ty)
-            cr:scale(sx, sy)
-            cr:set_source_surface(tmp, 0, 0)
-            cr:paint()
-            tmp:finish()
-
-            -- Overlays
-            cr:scale(1/sx, 1/sy)
-            cr:translate(-tx, -ty)
-            cr:set_source_rgba(0,0,0,overlay)
-            cr:rectangle(tx, ty, sx * cg.width, sy * cg.height)
-            cr:fill()
          end
       end
 
