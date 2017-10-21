@@ -45,7 +45,7 @@ switcher.settings.preview_box_border = "#22222200",                   -- border-
 switcher.settings.preview_box_fps = 30,                               -- refresh framerate
 switcher.settings.preview_box_delay = 150,                            -- delay in ms
 switcher.settings.preview_box_title_font = {"sans","italic","normal"},-- the font for cairo
-switcher.settings.preview_box_title_font_size_factor = 0.8,           -- the font sizing factor
+switcher.settings.preview_box_title_font_size_factor = 1.0,           -- the font sizing factor
 switcher.settings.preview_box_title_color = {0,0,0,1},                -- the font color
 
 switcher.settings.cycle_raise_client = false,                         -- raise (bring to front) selected clients while tabbing

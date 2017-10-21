@@ -33,7 +33,7 @@ local settings = {
    preview_box_fps = 30,
    preview_box_delay = 150,
    preview_box_title_font = {"sans","italic","normal"},
-   preview_box_title_font_size_factor = 0.8,
+   preview_box_title_font_size_factor = 1.0,
    preview_box_title_color = {0,0,0,1},
 
    cycle_raise_client = false,
@@ -106,10 +106,10 @@ local function preview()
    local preview_widgets = {}
 
    -- Make the wibox the right size, based on the number of clients
-   local n = math.max(7, #altTabTable)
-   local W = screen[mouse.screen].geometry.width -- + 2 * preview_wbox.border_width
+   local n = math.max(9, #altTabTable)
+   local W = screen[mouse.screen].geometry.width
    local w = W / n -- widget width
-   local h = w * 0.75  -- widget height -- without the titlebox!
+   local h = w * 1.0  -- widget height -- without the titlebox!
    local textboxHeight = w * 0.125
 
    local x = screen[mouse.screen].geometry.x - preview_wbox.border_width
@@ -120,7 +120,8 @@ local function preview()
    local text, textWidth, textHeight, maxText
    local maxTextWidth = 0
    local maxTextHeight = 0
-   local fontSize = textboxHeight / 2
+   local fontSize = textboxHeight / 2.0
+   fontSize = math.floor(fontSize * settings.preview_box_title_font_size_factor + 0.5)
    cr:set_font_size(fontSize)
    for i = 1, #altTabTable do
       text = " - " .. altTabTable[i].class
@@ -216,7 +217,7 @@ local function preview()
             -- Draw title for selected client
             if focus then
                tx = (w - textWidth) / 2
-               ty = h + (textboxHeight + textHeight) / 2
+               ty = 0.94 * h + (textboxHeight + 0.06 * h + textHeight) / 2
 
                cr:set_source_rgba(unpack(settings.preview_box_title_color))
                cr:move_to(tx, ty)
