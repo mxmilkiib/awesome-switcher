@@ -36,10 +36,6 @@ local settings = {
    preview_box_title_font_size_factor = 0.8,
    preview_box_title_color = {0,0,0,1},
 
-   client_opacity = false,
-   client_opacity_value = 0.5,
-   client_opacity_delay = 150,
-
    cycle_raise_client = false,
 }
 
@@ -54,7 +50,6 @@ local preview_widgets = {}
 
 local altTabTable = {}
 local altTabIndex = 1
-local applyOpacity = false
 
 local source = string.sub(debug.getinfo(1,'S').source, 2)
 local path = string.sub(source, 1, string.find(source, "/[^/]*$"))
@@ -89,12 +84,8 @@ local function cycle(altTabTable, altTabIndex, dir)
 
    altTabTable[altTabIndex].minimized = false
 
-   if not settings.preview_box and not settings.client_opacity then
+   if not settings.preview_box then
       client.focus = altTabTable[altTabIndex]
-   end
-
-   if settings.client_opacity then
-      clientOpacity(altTabTable, altTabIndex)
    end
 
    if settings.cycle_raise_client == true then
@@ -268,7 +259,6 @@ end
 local function switch(dir, alt, tab, shift_tab)
    altTabTable = {}
    local altTabMinimized = {}
-   local altTabOpacity = {}
 
    -- Get focus history for current tag
    local s = mouse.screen;
@@ -278,7 +268,6 @@ local function switch(dir, alt, tab, shift_tab)
    while c do
       table.insert(altTabTable, c)
       table.insert(altTabMinimized, c.minimized)
-      table.insert(altTabOpacity, c.opacity)
       idx = idx + 1
       c = awful.client.focus.history.get(s, idx)
    end
@@ -318,7 +307,6 @@ local function switch(dir, alt, tab, shift_tab)
          if addToTable then
             table.insert(altTabTable, c)
             table.insert(altTabMinimized, c.minimized)
-            table.insert(altTabOpacity, c.opacity)
          end
       end
    end
@@ -345,16 +333,6 @@ local function switch(dir, alt, tab, shift_tab)
    previewDelayTimer:start()
    preview_live_timer:start()
 
-   -- opacity delay timer
-   local opacityDelay = settings.client_opacity_delay / 1000
-   local opacityDelayTimer = timer({timeout = opacityDelay})
-   opacityDelayTimer:connect_signal("timeout", function()
-				       applyOpacity = true
-				       opacityDelayTimer:stop()
-				       clientOpacity(altTabTable, altTabIndex)
-   end)
-   opacityDelayTimer:start()
-
 
    -- Now that we have collected all windows, we should run a keygrabber
    -- as long as the user is alt-tabbing:
@@ -363,10 +341,8 @@ local function switch(dir, alt, tab, shift_tab)
          -- Stop alt-tabbing when the alt-key is released
          if key == alt or key == "Escape" and event == "release" then
             preview_wbox.visible = false
-            applyOpacity = false
             preview_live_timer:stop()
             previewDelayTimer:stop()
-            opacityDelayTimer:stop()
 
             if key == "Escape" then
                -- (cycle) back to the original client when escaping
@@ -393,7 +369,6 @@ local function switch(dir, alt, tab, shift_tab)
                if i ~= altTabIndex and altTabMinimized[i] then
                   altTabTable[i].minimized = true
                end
-               altTabTable[i].opacity = altTabOpacity[i]
             end
 
             keygrabber.stop()

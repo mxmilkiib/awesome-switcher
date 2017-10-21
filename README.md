@@ -48,10 +48,6 @@ switcher.settings.preview_box_title_font = {"sans","italic","normal"},-- the fon
 switcher.settings.preview_box_title_font_size_factor = 0.8,           -- the font sizing factor
 switcher.settings.preview_box_title_color = {0,0,0,1},                -- the font color
 
-switcher.settings.client_opacity = false,                             -- opacity for unselected clients
-switcher.settings.client_opacity_value = 0.5,                         -- alpha-value
-switcher.settings.client_opacity_delay = 150,                         -- delay in ms
-
 switcher.settings.cycle_raise_client = false,                         -- raise (bring to front) selected clients while tabbing
 ```
 
