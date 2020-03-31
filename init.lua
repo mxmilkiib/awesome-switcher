@@ -37,6 +37,7 @@ local settings = {
    preview_box_title_color = {0,0,0,1},
 
    cycle_raise_client = false,
+   swap_with_master = false,
 }
 
 -- Create a wibox to contain all the client-widgets
@@ -360,9 +361,14 @@ local function switch(dir, alt, tab, shift_tab)
                end
             end
 
-            -- raise chosen client on top of all
             c = altTabTable[altTabIndex]
+            -- raise selected client on top of all
             c:raise()
+            if settings.swap_with_master == true then
+                -- swap selected with master as well
+                c:swap(awful.client.getmaster())
+            end
+            -- focus selected client
             client.focus = c
 
             -- restore minimized clients
