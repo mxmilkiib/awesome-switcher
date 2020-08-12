@@ -17,7 +17,7 @@ local tostring = tostring
 local tonumber = tonumber
 local debug = debug
 local pairs = pairs
-local unpack = table.unpack
+local unpack = unpack or table.unpack
 
 local surface = cairo.ImageSurface(cairo.Format.RGB24,20,20)
 local cr = cairo.Context(surface)
